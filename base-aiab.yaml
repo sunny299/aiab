@@ -1,0 +1,677 @@
+deps:
+  #DATA Sources
+  appdb: true
+  adp-kafka: true
+  bfdb: true
+  capi: true
+  cdb: true
+  consul: true
+  couchbase: true
+  mdb: true
+  mdc: true
+  paydb: true
+  rabbitmq-ha: true
+  sharddb: true
+  sqlshard: true
+  sqlshard-rates: true
+
+  #PAPI Family
+  contentplatform: true
+  dfapi: true
+  dfapi-stream: true
+  npces: true
+  npcapiv2: true
+  papimetaapi: true
+  propertyapi: true
+  propertyapi-stream: true
+  propses: true
+
+  #Pricing
+  heisenberg: true
+  soybean: true
+
+  #Affiliate
+  affiliate-api-search: true
+  affiliate-api-book: true
+
+  #Price Push
+  supply-push: true
+  supply-push-aggregator: true
+  supply-push-mock: true
+
+  # Connectivity apps
+  abs-phoenix: true
+  ari-calculator: true
+  connectivity-init-mssql-data: true
+  content-processing-pipeline: true
+  content-push-api: true
+  cpp-api-ryokan: true
+  smapi: true
+  supply-cache-writer: true
+  supply-cds: false
+  supply-ota: true
+  ycs-api: true
+  spapi: true
+  suppliers-mock: true
+
+  # Test/Investigation tools
+  connectivity-cassandra-service: true
+  spapi-testtool: true
+  df-testtool: true
+
+  #Others
+  enigma: true
+  hermes: false
+  slservice: true
+  zenith: true
+
+global:
+  deps:
+    ebe-in-a-box: false
+  consul:
+    enabled: true
+
+abs-phoenix:
+  image:
+    repository: reg-hk.agodadev.io/connectivity/abs-phoenix
+    tag: latest
+  wiremock:
+    enabled: true
+
+adp-kafka:
+  # use old name "kafkainabox" so that all other apps using 9092 don't have to override hostname config
+  fullnameOverride: kafkainabox
+  service:
+    ports:
+      tcp:
+        9092: kafka
+        9093: kafka-secure
+        # also publish 2181 port for some apps which requires explicit zk connection (soon to be deprecated)
+        2181: zookeeper
+  resources:
+    limits:
+      cpu: 2
+      memory: 4Gi
+    requests:
+      cpu: 2
+      memory: 4Gi
+
+affiliate-api-search:
+  image:
+    repository: reg-hk.agodadev.io/it-acquisition-api/search
+    tag: latest
+
+affiliate-api-book:
+  image:
+    repository: reg-hk.agodadev.io/it-acquisition-api/booking
+    tag: latest
+  ebebapi:
+    enabled: true
+  ebebcre:
+    enabled: true
+
+appdb:
+  image:
+    repository: reg-hk.agodadev.io/dbdev/qa_sql_app_schema_nodata
+    tag: latest
+
+ari-calculator:
+  kafka:
+    host: kafkainabox
+    port: 9092
+    securePort: 9093
+    topics:
+      ariCalChangeMerger: supply-ari-calculator-change-message
+      ariCalHotelItinerary: supply-ota-hotel-itinerary
+      ariCalManualCal: supply-ari-calculator-demand-request
+      
+bfdb:
+  image:
+    repository: reg-hk.agodadev.io/dbdev/qa_sql_bfdb_data_hotel-list-bpf-velocity
+    tag: latest
+
+capi:
+  kafka:
+    enabled: true
+  resources:
+    limits:
+      cpu: 1
+      memory: 3Gi
+    requests:
+      cpu: 1
+      memory: 3Gi
+
+cdb:
+  image:
+    repository: reg-hk.agodadev.io/dbdev/qa_sql_cdb_schema_nodata
+    tag: latest
+
+connectivity-cassandra-service:
+  resources:
+    limits:
+      cpu: 1
+      memory: 2Gi
+    requests:
+      cpu: 1
+      memory: 2Gi
+
+connectivity-init-mssql-data:
+  cdb:
+    enabled: true
+  sharddb:
+    enabled: true
+
+contentplatform:
+  image:
+    repository: reg-hk.agodadev.io/papi/content/content-platform/release
+    tag: latest
+
+content-processing-pipeline:
+  resources:
+    limits:
+      cpu: 2
+      memory: 2Gi
+    requests:
+      cpu: 2
+      memory: 2Gi
+
+content-push-api:
+  kafka:
+    host: kafkainabox
+  resources:
+    limits:
+      cpu: 2
+      memory: 3Gi
+    requests:
+      cpu: 2
+      memory: 3Gi
+
+couchbase:
+  buckets: partners_api it-platform content_platform property_api it-papi-pricing text_search customer_api qa_shared_1 e2econnectivity acquisition-api connectivity
+  image:
+    repository: reg-hk.agodadev.io/dbdev/couchbase-qa-clone-affiliate-api
+    tag: snapshot
+
+cpp-api-ryokan:
+  resources:
+    limits:
+      cpu: 2
+      memory: 2Gi
+    requests:
+      cpu: 2
+      memory: 2Gi
+
+df-testtool:
+  resources:
+    limits:
+      cpu: 1
+      memory: 2Gi
+    requests:
+      cpu: 1
+      memory: 2Gi
+
+dfapi:
+  slservice:
+    enabled: true
+  image:
+    repository: reg-hk.agodadev.io/papi/pricing/dfapi/release
+    tag: latest
+  shardratesilo:
+    enabled: true
+  kafka:
+    enabled: true
+  ariCalculator:
+    host: ari-calculator
+    port: 8080
+    enabled: true
+  manualCalculate:
+    env: k8s
+
+dfapi-stream:
+  fullnameOverride: dfapi-stream
+  alternateStartMode: stream
+  clustermode: false
+  image:
+    repository: reg-hk.agodadev.io/papi/pricing/dfapi/release
+    tag: latest
+  rabbitmq:
+    enabled: true
+    host: rabbitmqinabox
+  shardratesilo:
+    enabled: true
+  slservice:
+    enabled: true
+  ariCalculator:
+    host: ari-calculator
+    port: 8080
+    enabled: true
+  manualCalculate:
+    env: k8s
+  extraConfigmap: |
+    traffic.forwarder.traffic-type = "papi.pricing.stream"
+    streaming-client {
+    actors = [
+        {
+      type = "passthrough"
+      exchange-in = "df-request.topic"
+      exchange-out = "df-response.topic"
+      exchange-failed = "df-response.topic"
+      binded-queue = "df-request"
+      ttl = 10 minutes
+      dlx-name = "deadletter.topic"
+      stream-buffer {
+                      prefetch-count = 200
+                      transformers = 20
+                    }
+        }
+      ]
+    }
+    op-rabbit {
+      default-channel-dispatcher {
+        type = Dispatcher
+        executor = "fork-join-executor"
+        fork-join-executor {
+        parallelism-min = 8
+        parallelism-factor = 2.0
+        parallelism-max = 16
+        }
+        throughput = 1
+      }
+      connection {
+      virtual-host = "/"
+      hosts = ["{{ .Values.rabbitmq.host }}"]
+      username = "papirabbit"
+      password = "7f8q3c5DoVShZLUomF"
+      port = 5672
+      ssl = false
+      connection-timeout = 10s
+      }
+    }
+    barrier-settings {
+      reset-timeout = 5 seconds
+      type = "sleep"
+    }
+
+heisenberg:
+  image:
+    repository: reg-hk.agodadev.io/pricing/heisenberg-qa/release
+    tag: latest
+  devweb:
+    host: cdb
+  parent:
+    configs:
+      - qa.conf
+  resources:
+    limits:
+      cpu: 2
+      memory: 6Gi
+    requests:
+      cpu: 2
+      memory: 6Gi
+
+enigma:
+  image:
+    repository: reg-hk.agodadev.io/capi/enigma
+    tag: latest
+  resources:
+    limits:
+      cpu: 1
+      memory: 4Gi
+    requests:
+      cpu: 1
+      memory: 4Gi
+
+mdb:
+  image:
+    repository: reg-hk.agodadev.io/dbdev/qa_sql_mdb_affiliate_k8s_tests
+    tag: latest
+
+mdc:
+  image:
+    repository: reg-hk.agodadev.io/dbdev/qa_sql_mdc_schema_nodata
+    tag: latest
+  resources:
+    limits:
+      cpu: 3
+      memory: 10Gi
+    requests:
+      cpu: 3
+      memory: 10Gi
+
+npcapiv2:
+  image:
+    repository: reg-hk.agodadev.io/non-property-content/npc-api/release
+    tag: latest
+
+npces:
+  image:
+    repository: reg-hk.agodadev.io/dbdev/elasticsearch-npc-qa-7.4
+    tag: latest
+  resources:
+    limits:
+      cpu: 3
+      memory: 10Gi
+    requests:
+      cpu: 3
+      memory: 10Gi
+
+papimetaapi:
+  image:
+    repository: reg-hk.agodadev.io/papi/pricestream/papi-price-stream/release
+    tag: latest
+  runSyncDB: false
+  runSyncDBForShardDB: false
+
+paydb:
+  image:
+    repository: reg-hk.agodadev.io/dbdev/qa_sql_paydb_data_hotel-list-bpf-velocity
+    tag: latest
+
+propertyapi:
+  fullnameOverride: propertyapi
+  image:
+    repository: reg-hk.agodadev.io/papi/search/propertyapi/release
+    tag: latest
+  npc:
+    host: npcapiv2
+  shardavailabilities:
+    enabled: true
+
+propertyapi-stream:
+  dfapi:
+    host: dfapi-stream
+  fullnameOverride: propertyapi-stream
+  image:
+    repository: reg-hk.agodadev.io/papi/search/propertyapi/release
+    tag: latest
+  initContainer:
+    limits:
+      cpu: 2
+      memory: 2Gi
+    requests:
+      cpu: 2
+      memory: 2Gi
+  npc:
+    host: npcapiv2
+  rabbitmq:
+    enabled: true
+  shardavailabilities:
+    enabled: true
+  startMode: stream
+  extraConfigmap: |
+    op-rabbit {
+      default-channel-dispatcher {
+        type = Dispatcher
+        executor = "fork-join-executor"
+        fork-join-executor {
+          parallelism-min = 8
+          parallelism-factor = 2.0
+          parallelism-max = 32
+        }
+        throughput = 1
+      }
+      connection {
+        virtual-host = "/"
+        hosts = ["{{ .Values.rabbitmq.host }}"]
+        username = "papirabbit"
+        password = "7f8q3c5DoVShZLUomF"
+        port = 5672
+        ssl = false
+        connection-timeout = 10s
+      }
+    }
+    site.cache-warm-up = false
+    price-push.enabled = true
+    traffic.forwarder.traffic-type = "papi.search.stream"
+    papi-stream.rabbit-serialization-type = "json-serialization"
+    streaming-client {
+      actors = [
+        {
+          id = "request-transformer"
+          type = "passthrough"
+          exchange-in = "papi-request.topic"
+          exchange-out = "df-request.topic"
+          exchange-failed = "papi-response.topic"
+          binded-queue = "papi-request"
+          ttl = 10 minutes
+          dlx-name = "deadletter.topic"
+          stream-buffer {
+            prefetch-count = 200
+            transformers = 10
+          }
+        },
+        {
+          id = "response-transformer"
+          type = "passthrough"
+          exchange-in = "df-response.topic"
+          exchange-out = "papi-response.topic"
+          exchange-failed = "papi-response.topic"
+          binded-queue = "df-response"
+          ttl = 10 minutes
+          dlx-name = "deadletter.topic"
+          stream-buffer {
+            prefetch-count = 200
+            transformers = 10
+          }
+        },
+        {
+          id = "timeout-transformer"
+          type = "passthrough"
+          exchange-in = "deadletter.topic"
+          exchange-out = "papi-response.topic"
+          exchange-failed = "papi-response.topic"
+          binded-queue = "timeout"
+          ttl = 1 day
+          dlx-name = "deadletter.topic"
+          stream-buffer {
+            prefetch-count = 200
+            transformers = 5
+          }
+        }
+      ]
+    }
+
+propses:
+  image:
+    repository: reg-hk.agodadev.io/dbdev/elasticsearch7-papi-qa
+    tag: latest
+  resources:
+    limits:
+      cpu: 3
+      memory: 4Gi
+    requests:
+      cpu: 3
+      memory: 4Gi
+
+rabbitmq-ha:
+  clusterDomain: hkci-k8s-a.local
+  service:
+    type: NodePort
+    clusterIP: ""
+  replicaCount: 1
+  rabbitmqErlangCookie: igzgiJ6ZRYofWYoLV9r8dWFJYMQFONaB
+  rabbitmqVhost: '/'
+  papiRabbitConfig:
+    enabled: true
+    rabbitmqUsername: papirabbit
+    rabbitmqPassword: 7f8q3c5DoVShZLUomF
+    monitorUsername: rabbitmonitor
+    monitorPassword: suo6obCTt9YEFf8o2R
+    policy:
+      dfRequest:
+        maxLength: 400000
+        overflowStrategy: reject-publish
+        priority: 1
+      papiRequest:
+        maxLength: 10000
+        overflowStrategy: reject-publish
+        priority: 1
+      papiResponse:
+        maxLength: 5000
+        overflowStrategy: reject-publish
+        priority: 1
+      pricepushPapiResponse:
+        maxLength: 50000
+        overflowStrategy: reject-publish
+        priority: 2
+      seoPapiResponse:
+        maxLength: 10000
+        overflowStrategy: reject-publish
+        priority: 2
+  resources:
+    limits:
+      cpu: 10
+      memory: 2Gi
+    requests:
+      cpu: 10
+      memory: 2Gi
+
+sharddb:
+  resources:
+    limits:
+      cpu: 4
+      memory: 16Gi
+    requests:
+      cpu: 4
+      memory: 16Gi
+
+smapi:
+  image:
+    repository: reg-hk.agodadev.io/connectivity/smapi
+    tag: latest
+
+slservice:
+  image:
+    repository: reg-hk.agodadev.io/everest/api-server
+    tag: latest
+
+soybean:
+  image:
+    repository: reg-hk.agodadev.io/pricing/soybean-qa/release
+    tag: latest
+  devweb:
+    host: cdb
+  parent:
+    configs:
+      - qa.conf
+
+sqlshard:
+  image:
+    repository: reg-hk.agodadev.io/dbdev/qa_sql_dfcity_schema_nodata
+    tag: latest
+  resources:
+    limits:
+      cpu: 2
+      memory: 13Gi
+    requests:
+      cpu: 2
+      memory: 13Gi
+
+
+sqlshard-rates:
+  image:
+    repository: reg-hk.agodadev.io/dbdev/qa_sql_dfhotel_schema_nodata
+    tag: latest
+  resources:
+    limits:
+      cpu: 2
+      memory: 13Gi
+    requests:
+      cpu: 2
+      memory: 13Gi
+
+supply-cache-writer:
+  adpMessaging:
+    enabled: true
+  kafka:
+    host: kafkainabox
+
+supply-ota:
+  smapiMockServer:
+    host: smapi
+  zookeeper:
+    host: kafkainabox
+    port: 2181
+
+supply-push:
+  image:
+    repository: reg-hk.agodadev.io/it-acquisition-api/supply-push
+    tag: latest
+  supplypushmock:
+    enabled: true
+  zookeeper:
+    host: kafkainabox
+  resources:
+    limits:
+      cpu: 3
+      memory: 4Gi
+    requests:
+      cpu: 3
+      memory: 4Gi
+
+supply-push-aggregator:
+  zookeeper:
+    host: kafkainabox
+
+supply-push-mock:
+  kafka:
+    enabled: true
+
+ycs-api:
+  resources:
+    limits:
+      cpu: 2
+      memory: 6Gi
+    requests:
+      cpu: 2
+      memory: 6Gi
+
+zenith:
+  image:
+    repository: reg-hk.agodadev.io/personalization/zenith-prod
+    tag: latest
+  resources:
+    limits:
+      cpu: 2
+      memory: 22Gi
+    requests:
+      cpu: 2
+      memory: 22Gi
+
+spapi:
+  image:
+    repository: reg-hk.agodadev.io/connectivity-pull/spapi
+    tag: latest
+  initData:
+    init: true
+  enableMock: true
+  javaOpts: |-
+    -Dappname=supplier-pull-api
+      -Dconfig.file=/opt/supplier-pull-api/conf/common/aiab-docker.conf
+      -Dlog.dir=/opt/supplier-pull-api/log/
+      -Dlogback.configurationFile=/opt/supplier-pull-api/conf/logback-test.xml
+      -Djavax.net.ssl.trustStore=/opt/certificate/cacerttrust_agoda_local.jks
+      -Dcom.sun.management.jmxremote.port=3333
+      -Dcom.sun.management.jmxremote.ssl=false
+      -Dcom.sun.management.jmxremote.authenticate=false
+      -Xmx4g
+      -XX:+UseGCLogFileRotation
+      -XX:NumberOfGCLogFiles=7
+      -XX:GCLogFileSize=20M
+      -Xloggc:/opt/supplier-pull-api/log/jvm.log
+      -XX:+UseG1GC
+      -XX:+UseStringDeduplication
+      -XX:+PrintStringDeduplicationStatistics
+      -server
+  wiremock:
+    enabled: true
+
+spapi-testtool:
+  image:
+    repository: reg-hk.agodadev.io/connectivity-pull/spapi-testtool
+    tag: latest
+
+suppliers-mock:
+  image:
+    repository: reg-hk.agodadev.io/connectivity/suppliers-mock
+    tag: latest
