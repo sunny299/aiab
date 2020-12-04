@@ -1,0 +1,4 @@
+consul:
+  ingress:
+    hosts:
+      - consul.sunny-test.hk-aiab-2b.agodadev.io
