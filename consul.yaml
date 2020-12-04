@@ -1,3 +1,5 @@
+deps:
+  consul: true
 consul:
   ingress:
     hosts:
