@@ -1,0 +1,89 @@
+
+
+propertyapi:
+  npc:
+    host: npcapiv2
+
+propertysearch:
+  npc:
+    host: npcapiv2
+
+propertyapi-stream:
+  npc:
+    host: npcapiv2
+
+dfapi-stream:
+  alternateStartMode: stream
+  clustermode: false
+
+landing-clay:
+  extraEnvs:
+  - name: ASPNETCORE_ENVIRONMENT
+    value: Development
+  - name: ASPNETCORE_URLS
+    value: http://+:5000
+
+# prevent OOMKilled
+cassandra:
+  resources:
+    limits:
+      cpu: 1
+      memory: 20Gi
+    requests:
+      cpu: 1
+      memory: 20Gi
+
+cdb:
+  fullnameOverride: cdb-pinto
+
+cdb-ceph:
+  fullnameOverride: cdb
+  resources:
+    limits:
+      cpu: 4
+      memory: 20Gi
+    requests:
+      cpu: 4
+      memory: 20Gi
+
+############################
+### required from supply-ota
+connectivity-init-mssql-data:
+  cdb:
+    host: cdb-pinto
+
+supply-ota:
+  cdb:
+    host: cdb-pinto
+
+############################
+### required from pix-imgapi
+pix-imgapi:
+  cassandra:
+    host: cassandra-pix-imgapi
+
+
+############################
+### required from flapi
+flapi:
+  # cassandra:
+  #   host: cassandra-flapi
+  parent:
+    configs:
+      - ../infrastructure/src/main/resources/application.conf
+      - ../infrastructure/src/main/resources/dev-qa.conf
+
+############################
+### required from npcindexer
+npcindexer:
+  cdb:
+    host: cdb-npc 
+
+npces: 
+  resources:
+    limits:
+      cpu: 4
+      memory: 4Gi
+    requests:
+      cpu: 4
+      memory: 4Gi
