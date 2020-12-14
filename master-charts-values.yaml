@@ -3,33 +3,49 @@
 
 rabbitmq-ha:
   clusterDomain: hk-aiab-2b.local
+  rbac:
+    create: true
+    pspEnabled: true
 
 global:
   ingress:
     class: istio
     cluster: hk-aiab-2b.agoda.local
     pathType: Prefix
-rbac:
-  create: true
-  pspEnabled: false
-  pspUseAppArmor: false    
+
+# rbac:
+#   create: true
+#   pspEnabled: false
+#   pspUseAppArmor: false    
 ##################
 
 propertyapi:
   npc:
     host: npcapiv2
+  rbac:
+    create: true
+    pspEnabled: true
 
 propertysearch:
   npc:
     host: npcapiv2
+  rbac:
+    create: true
+    pspEnabled: true
 
 propertyapi-stream:
   npc:
     host: npcapiv2
+  rbac:
+    create: true
+    pspEnabled: true
 
 dfapi-stream:
   alternateStartMode: stream
   clustermode: false
+  rbac:
+    create: true
+    pspEnabled: true
 
 landing-clay:
   extraEnvs:
@@ -37,6 +53,9 @@ landing-clay:
     value: Development
   - name: ASPNETCORE_URLS
     value: http://+:5000
+  rbac:
+    create: true
+    pspEnabled: true
 
 # prevent OOMKilled
 cassandra:
@@ -47,9 +66,15 @@ cassandra:
     requests:
       cpu: 1
       memory: 20Gi
+    rbac:
+      create: true
+      pspEnabled: true
 
 cdb:
   fullnameOverride: cdb-pinto
+  rbac:
+    create: true
+    pspEnabled: true
 
 cdb-ceph:
   fullnameOverride: cdb
@@ -60,23 +85,34 @@ cdb-ceph:
     requests:
       cpu: 4
       memory: 20Gi
+  rbac:
+    create: true
+    pspEnabled: true
 
 ############################
 ### required from supply-ota
 connectivity-init-mssql-data:
   cdb:
     host: cdb-pinto
+  rbac:
+    create: true
+    pspEnabled: true
 
 supply-ota:
   cdb:
     host: cdb-pinto
+  rbac:
+    create: true
+    pspEnabled: true
 
 ############################
 ### required from pix-imgapi
 pix-imgapi:
   cassandra:
     host: cassandra-pix-imgapi
-
+  rbac:
+    create: true
+    pspEnabled: true
 
 ############################
 ### required from flapi
@@ -87,12 +123,18 @@ flapi:
     configs:
       - ../infrastructure/src/main/resources/application.conf
       - ../infrastructure/src/main/resources/dev-qa.conf
+  rbac:
+    create: true
+    pspEnabled: true
 
 ############################
 ### required from npcindexer
 npcindexer:
   cdb:
     host: cdb-npc 
+  rbac:
+    create: true
+    pspEnabled: true
 
 npces: 
   resources:
@@ -102,3 +144,6 @@ npces:
     requests:
       cpu: 4
       memory: 4Gi
+  rbac:
+    create: true
+    pspEnabled: true
