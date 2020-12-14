@@ -9,7 +9,10 @@ global:
     class: istio
     cluster: hk-aiab-2b.agoda.local
     pathType: Prefix
-    
+rbac:
+  create: true
+  pspEnabled: false
+  pspUseAppArmor: false    
 ##################
 
 propertyapi:
