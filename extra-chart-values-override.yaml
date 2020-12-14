@@ -7,10 +7,13 @@ kafka-v5:
   fullnameOverride: kafka-v5
   zookeeper:
     fullnameOverride: zookeeper-v3
+  rbac:
+    create: true
+    pspEnabled: true
 
 rbac:
   create: true
-  pspEnabled: false
+  pspEnabled: true
   pspUseAppArmor: false
   
 ############################
@@ -27,6 +30,9 @@ cassandra:
     requests:
       cpu: 4
       memory: 20Gi
+  rbac:
+    create: true
+    pspEnabled: true
   
 
 ############################
@@ -45,3 +51,6 @@ cdb:
       memory: 30Gi
   logForwarderJob:
     enabled: false
+  rbac:
+    create: true
+    pspEnabled: true
