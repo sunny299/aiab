@@ -8,6 +8,11 @@ kafka-v5:
   zookeeper:
     fullnameOverride: zookeeper-v3
 
+rbac:
+  create: true
+  pspEnabled: false
+  pspUseAppArmor: false
+  
 ############################
 ### required from pix-imgapi
 cassandra:
@@ -22,6 +27,7 @@ cassandra:
     requests:
       cpu: 4
       memory: 20Gi
+  
 
 ############################
 ### required from npcindexer
