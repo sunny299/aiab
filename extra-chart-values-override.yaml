@@ -11,10 +11,9 @@ kafka-v5:
     create: true
     pspEnabled: true
 
-rbac:
-  create: true
-  pspEnabled: true
-  pspUseAppArmor: false
+# rbac:
+#   create: true
+#   pspEnabled: true
   
 ############################
 ### required from pix-imgapi
