@@ -3,6 +3,7 @@ serviceAccount:
 
 rbac:
   create: true
+  pspEnabled: true
 
 rolepsp:
   name: aiab-psp-role
