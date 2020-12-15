@@ -1,3 +1,12 @@
+serviceAccount:
+  create: true
+
+rbac:
+  create: true
+
+rolepsp:
+  name: aiab-psp-role
+
 deps:
   cassandra: true
   cdb: true
@@ -7,13 +16,7 @@ kafka-v5:
   fullnameOverride: kafka-v5
   zookeeper:
     fullnameOverride: zookeeper-v3
-  rbac:
-    create: true
-    pspEnabled: true
 
-# rbac:
-#   create: true
-#   pspEnabled: true
   
 ############################
 ### required from pix-imgapi
@@ -29,11 +32,7 @@ cassandra:
     requests:
       cpu: 4
       memory: 20Gi
-  rbac:
-    create: true
-    pspEnabled: true
   
-
 ############################
 ### required from npcindexer
 cdb:
@@ -50,6 +49,3 @@ cdb:
       memory: 30Gi
   logForwarderJob:
     enabled: false
-  rbac:
-    create: true
-    pspEnabled: true
