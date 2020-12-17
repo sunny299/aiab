@@ -1,13 +1,6 @@
 serviceAccount:
   create: true
 
-rbac:
-  create: true
-  pspEnabled: true
-
-rolepsp:
-  name: aiab-psp-role
-
 deps:
   cassandra: true
   cdb: true
