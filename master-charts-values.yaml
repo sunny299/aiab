@@ -7,11 +7,6 @@ global:
     cluster: hk-aiab-2b.agoda.local
     pathType: Prefix
 
-rbac:
-  create: false
-
-# rolepsp:
-#   name: aiab-psp-role
 ##################
 
 propertyapi:
