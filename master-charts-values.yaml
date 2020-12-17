@@ -1,12 +1,6 @@
 rabbitmq-ha:
   clusterDomain: hk-aiab-2b.local
 
-global:
-  ingress:
-    class: istio
-    cluster: hk-aiab-2b.agoda.local
-    pathType: Prefix
-
 ##################
 
 propertyapi:
